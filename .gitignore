@@ -1,0 +1,18 @@
+# Ambiente e ficheiros temporários
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Dados e resultados locais
+imagens/
+mascaras/
+dados/
+resultados/
+
+# Credenciais
+.envimagens/case_radboud_0466.tif
+*.tif
+imagens/
+*.tif
+imagens/
