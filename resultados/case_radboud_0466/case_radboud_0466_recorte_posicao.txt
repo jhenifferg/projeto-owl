@@ -1,0 +1,5 @@
+x=21664
+y=16608
+nivel=0
+largura=1024
+altura=1024

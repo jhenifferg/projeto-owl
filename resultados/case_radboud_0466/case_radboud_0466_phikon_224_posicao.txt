@@ -1,0 +1,9 @@
+x=21945
+y=16889
+nivel=0
+largura_original=462
+altura_original=462
+tamanho_saida=224
+mpp_original=0.2425347381273798
+mpp_alvo=0.5
+mpp_efetivo=0.5002278973877209
