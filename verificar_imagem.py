@@ -4,7 +4,9 @@ from config import PASTA_PROJETO, NOME_CASO
 
 
 pasta_projeto = PASTA_PROJETO
-caminho_imagem = pasta_projeto / "imagens" / NOME_CASO ## Dentro da pasta do projeto, entre na pasta imagens e procure o ficheiro case_radboud_0466.tif.
+nome_caso = NOME_CASO
+
+caminho_imagem = pasta_projeto / "imagens" / f"{nome_caso}.tif"
 
 if not caminho_imagem.is_file(): ## Se não existir um ficheiro nesse caminho, interrompa o programa e apresente o erro.
     raise FileNotFoundError(f"Imagem não encontrada: {caminho_imagem}")

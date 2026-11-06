@@ -1,11 +1,13 @@
 from pathlib import Path
 
-from config import PASTA_PROJETO, NOME_CASO
-
 import numpy as np
 from PIL import Image
 
+from config import PASTA_PROJETO, NOME_CASO
+
+
 pasta_projeto = PASTA_PROJETO
+nome_caso = NOME_CASO
 pasta_resultados = pasta_projeto / "resultados"
 
 # Abrir as duas pré-visualizações que já guardámos.
@@ -14,7 +16,7 @@ imagem = Image.open(
 ).convert("RGB")
 
 mascara = Image.open(
-    pasta_resultados / "mascara_previa.png"
+    pasta_resultados / f"{nome_caso}_mascara_previa.png"
 ).convert("RGB")
 
 # Confirmar que têm o mesmo tamanho.
@@ -39,7 +41,8 @@ sobreposicao = Image.alpha_composite(
     Image.fromarray(camada)
 )
 
-caminho_saida = pasta_resultados / "sobreposicao_mascara.png"
-sobreposicao.convert("RGB").save(caminho_saida)
+caminho_saida = (
+    pasta_resultados / f"{nome_caso}_sobreposicao.png"
+)
 
 print("Sobreposição guardada em:", caminho_saida)
