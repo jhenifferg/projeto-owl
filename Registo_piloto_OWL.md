@@ -20,6 +20,10 @@ Este documento acompanha a passagem dos recortes de cada lâmina para uma repres
 | `case_radboud_0466` | Jheniffer | Verificado no teste anterior | NPZ presente, formato 1 000 × 768 registado no JSON. CSV com 1 000 linhas de dados. Ordem e coordenadas conferidas automaticamente. | Presente | Pendente | `resultados_piloto/case_radboud_0466/piloto_v1_1000/` |
 | `case_radboud_0596` | A definir | Pendente | Pendente | Pendente | Pendente | A preencher |
 | Adicionar novo caso | | | | | | |
+| `case_radboud_0247` | Catarina | Verificado | NPZ presente, formato 1 000 × 768 registado no JSON. CSV com 1 000 linhas de dados. Ordem e coordenadas conferidas automaticamente. | Presente | Pendente | `resultados_piloto/case_radboud_0247/piloto_v1_1000/` |
+| `case_radboud_0594` | Catarina | Verificado | NPZ presente, formato 1 000 × 768 registado no JSON. CSV com 1 000 linhas de dados. Ordem e coordenadas conferidas automaticamente. | Presente | Pendente | `resultados_piloto/case_radboud_0594/piloto_v1_1000/` |
+| `case_radboud_0626` | Catarina | Verificado | NPZ presente, formato 1 000 × 768 registado no JSON. CSV com 1 000 linhas de dados. Ordem e coordenadas conferidas automaticamente. | Presente | Pendente | `resultados_piloto/case_radboud_0626/piloto_v1_1000/` |
+| Adicionar novo caso | | | | | | |
 
 ## Antes de marcar um caso como pronto
 
