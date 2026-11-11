@@ -17,7 +17,7 @@ git clone https://github.com/jhenifferg/projeto-owl.git
 cd projeto-owl
 ```
 
-Abre esta pasta no VS Code. Todos os comandos seguintes são executados na raiz, onde está `config.py`. Para fazer push, cada colega precisa de conta GitHub, convite de colaboradora aceite e autenticação Git configurada. A leitura de um repositório público não concede permissão de escrita. No VS Code, a autenticação pode ser feita pelo fluxo de início de sessão do GitHub quando solicitado.
+Abre esta pasta no VS Code. Todos os comandos seguintes são executados na raiz, onde está `config.py`. 
 
 Antes do primeiro commit, configura a tua identidade com `git config user.name "O teu nome"` e `git config user.email "O teu email associado ao GitHub"` dentro desta pasta.
 
@@ -47,11 +47,11 @@ python -m pip check
 python -c "import openslide, torch, transformers, numpy; print('Dependências disponíveis')"
 ```
 
-O `requirements.txt` inclui a biblioteca nativa `openslide-bin`. Se a instalação indicar que não existe uma distribuição compatível, envia ao grupo o erro, a versão de Python e o sistema operativo antes de alterar versões. No VS Code seleciona o interpretador `.venv` em **Python: Select Interpreter**. Reativa o ambiente em cada terminal novo.
+O `requirements.txt` inclui a biblioteca nativa `openslide-bin`. S
 
 ## 4. Obter os dados do teu caso
 
-Combina primeiro no grupo qual caso vais processar. Acede à [página de download oficial do OWL](https://owl.grand-challenge.org/data-download/) com a tua conta autorizada e segue as condições de acesso apresentadas pelo desafio. Se não tiveres acesso, resolve-o com o grupo antes de executar os scripts. Descarrega apenas a lâmina atribuída, a máscara correspondente e os rótulos necessários; não é preciso descarregar o conjunto completo.
+Descarrega apenas a lâmina atribuída, a máscara correspondente e os rótulos necessários; não é preciso descarregar o conjunto completo.
 
 Cria estas pastas na raiz e coloca os ficheiros nos caminhos indicados (0466 é um exemplo; usa o teu identificador):
 
@@ -61,7 +61,7 @@ mascaras/case_radboud_0466_tissue.tif
 dados/training_labels.csv
 ```
 
-As imagens, máscaras e rótulos não são distribuídos com o código. Os rótulos serão necessários para a análise de sobrevivência, mas não para extrair características. O download do modelo Phikon requer internet na primeira execução; a imagem é processada localmente.
+As imagens, máscaras e rótulos não são distribuídos com o código. Os rótulos serão necessários para a análise de sobrevivência, mas não para extrair características.
 
 ## 5. Configurar o teu caso sem alterar a configuração da equipa
 
@@ -111,7 +111,7 @@ O mapa fica em `visualizacoes/<caso>/<execucao>/distribuicao_recortes.png`. Esta
 
 Se a pasta do lote já existir, o código protege os resultados. Se só falta o NPZ e a preparação terminou, retoma em `phikon_lote.py`. Se a extração foi interrompida ou pretendes repetir o lote, escolhe outro nome em `config_local.json`, por exemplo `piloto_v1_1000_v2`. Não copies JSONs entre execuções.
 
-## 8. Preparar os três ficheiros para partilha
+## 8. Publicar os resultados no GitHub
 
 Em qualquer sistema, incluindo PowerShell:
 
@@ -121,9 +121,9 @@ python preparar_partilha.py
 
 O comando valida o lote e copia apenas `caracteristicas.npz`, `coordenadas.csv` e `execucao.json` para `resultados_piloto/<caso>/<execucao>/`. Cópias existentes idênticas são aceites; ficheiros diferentes nunca são substituídos. Esta preparação é local e não faz uploads.
 
-O repositório do grupo é público. A publicação dos resultados derivados deve estar acordada com o grupo e ser permitida pelas condições do OWL; caso contrário, entrega os três ficheiros por um canal privado autorizado. A presença de um caminho no registo não significa que o lote já esteja no GitHub.
+Os resultados podem ser publicados no repositório público do grupo, conforme confirmado pela equipa. A pasta `resultados_piloto/` não é ignorada pelo Git; não é necessária uma pasta privada. Para fazer push, usa a tua conta GitHub com o convite de colaboradora aceite.
 
-Quando a publicação estiver autorizada, os comandos seguintes funcionam em Bash e PowerShell. Substitui os caminhos pelo teu caso e execução:
+Depois da preparação, executa os comandos abaixo. O exemplo usa o caso 0466: **substitui `case_radboud_0466`, `piloto_v1_1000` e a mensagem do commit pelo teu caso e execução em todos os caminhos**. Os comandos funcionam em Bash e PowerShell.
 
 ```bash
 git add -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json
@@ -133,7 +133,7 @@ git pull --rebase
 git push
 ```
 
-Se houver alterações locais pendentes, trata-as antes do pull. Se houver conflito, não uses force push: pede ajuda ao grupo. O `config_local.json` não entra no Git. Atualiza `Registo_piloto_OWL.md` e faz um commit separado desse registo. Para publicar o mapa, adiciona explicitamente o PNG em `visualizacoes/<caso>/<execucao>/` e faz um commit separado, após a mesma verificação das condições de publicação.
+Se houver alterações locais pendentes, trata-as antes do pull. Se houver conflito, não uses force push: pede ajuda ao grupo. O `config_local.json` não entra no Git. Atualiza `Registo_piloto_OWL.md` e faz um commit separado desse registo. Para publicar o mapa, adiciona explicitamente o PNG em `visualizacoes/<caso>/<execucao>/` e faz um commit separado. Depois executa `git pull --rebase` e `git push` para enviar também esse commit.
 
 ## 9. Receber trabalho das colegas
 
