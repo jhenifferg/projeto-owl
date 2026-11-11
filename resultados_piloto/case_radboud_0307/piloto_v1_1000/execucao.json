@@ -1,0 +1,26 @@
+{
+  "preparacao": {
+    "caso": "case_radboud_0307",
+    "execucao": "piloto_v1_1000",
+    "quantidade_recortes": 1000,
+    "tamanho_saida_px": 224,
+    "mpp_alvo": 0.5,
+    "fracao_minima_tecido": 0.8,
+    "semente": 42
+  },
+  "caso": "case_radboud_0307",
+  "execucao": "piloto_v1_1000",
+  "modelo": "owkin/phikon",
+  "revisao_modelo": "057cc0295895c2df3dd7681a89680da6015cbefe",
+  "recortes_processados": 1000,
+  "formato_caracteristicas": [
+    1000,
+    768
+  ],
+  "tamanho_saida_px": 224,
+  "mpp_alvo": 0.5,
+  "fracao_minima_tecido": 0.8,
+  "semente": 42,
+  "dispositivo": "cpu",
+  "tempo_extracao_s": 453.56
+}
