@@ -1,14 +1,12 @@
-# Ambiente e ficheiros temporários
 .venv/
 __pycache__/
 *.pyc
 .DS_Store
-
-# Dados e resultados locais
 imagens/
 mascaras/
+dados/
+resultados/
+.env
 
-# Credenciais
-*.tif
-imagens/
-
+# Os mapas em visualizacoes/ são versionados; resultados/ continua local.
+config_local.json

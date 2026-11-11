@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import numpy as np
 from PIL import Image
 
@@ -8,7 +6,7 @@ from config import PASTA_PROJETO, NOME_CASO
 
 pasta_projeto = PASTA_PROJETO
 nome_caso = NOME_CASO
-pasta_resultados = pasta_projeto / "resultados"
+pasta_resultados = pasta_projeto / "resultados" / nome_caso / "previas"
 
 # Abrir as duas pré-visualizações que já guardámos.
 imagem = Image.open(
@@ -45,4 +43,5 @@ caminho_saida = (
     pasta_resultados / f"{nome_caso}_sobreposicao.png"
 )
 
+sobreposicao.convert("RGB").save(caminho_saida)
 print("Sobreposição guardada em:", caminho_saida)
