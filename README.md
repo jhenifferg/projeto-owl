@@ -4,15 +4,11 @@ Projeto académico de previsão de recorrência bioquímica do cancro da prósta
 
 ## Estado atual
 
-Esta versão lê uma imagem e a máscara de tecido, gera pré-visualizações, prepara **um recorte** e extrai 768 características com o Phikon pré-treinado.
-
-**Ainda não processa um paciente completo, não treina um modelo de sobrevivência e não prevê recorrência.** O objetivo inicial é reproduzir o teste técnico nas máquinas do grupo.
+O fluxo atual permite verificar uma lâmina e a máscara de tecido, extrair recortes em lote e guardar as 768 características de cada recorte com o Phikon. O caso 0466 já foi processado com 1 000 recortes. Este guia cobre a preparação dos dados para o futuro modelo de sobrevivência.
 
 ## 1. Preparar o computador
 
-Instalar Python e VS Code, caso ainda não estejam disponíveis. No VS Code, instalar a extensão Python da Microsoft.
-
-O ambiente já testado foi macOS com Apple M4, 16 GB de memória, Python 3.14.7, OpenSlide 1.4.7, PyTorch 2.15.0 e Transformers 5.22.1. Outras configurações ainda precisam de ser verificadas. Não é obrigatório ter um Mac; no Windows/Linux podem ser necessários ajustes de instalação. Sem uma GPU compatível, o teste pode utilizar CPU.
+Instalar Python (a versão usada neste projeto é 3.14.7) e VS Code.
 
 ## 2. Obter o código
 
@@ -59,153 +55,90 @@ Criar estas pastas na raiz do projeto:
 | `dados/` | `training_labels.csv`. |
 | `resultados/` | Ficheiros produzidos pelos scripts; a pasta é criada pelo código quando necessário. |
 
-Para reproduzir o caso já testado:
 
-- `imagens/case_radboud_0466.tif`
-- `mascaras/case_radboud_0466_tissue.tif`
-- `dados/training_labels.csv`
+## 5. Configurar um caso novo
 
-Descarregar os dados da fonte oficial do OWL, respeitando as suas condições de acesso e utilização. As imagens grandes não são incluídas no GitHub. Cada pessoa descarrega apenas os casos necessários e confirma o espaço disponível.
-
-## 5. Escolher o caso
-
-O ficheiro `config.py` deve conter:
+Em `config.py`, altera estas três linhas. O exemplo usa o caso 0596. Usa o identificador do teu caso sem `.tif` nem `_tissue`.
 
 ```python
-from pathlib import Path
-
-PASTA_PROJETO = Path(__file__).resolve().parent
-NOME_CASO = "case_radboud_xxxx"
+NOME_CASO = "case_radboud_0596"
+NOME_EXECUCAO = "piloto_v1_1000"
+QUANTIDADE_RECORTES = 1000
 ```
 
-O nome é escrito **sem `.tif` e sem `_tissue`**. Todos os scripts devem importar esta configuração e construir os nomes dos ficheiros a partir dela.
+Coloca `case_radboud_0596.tif` em `imagens/` e `case_radboud_0596_tissue.tif` em `mascaras/`. Usa a mesma revisão do Phikon e os parâmetros de preparação acordados pelo grupo.
 
-Antes de trocar de caso, verificar novamente dimensões, níveis, escala física e sobreposição da máscara.
+## 6. Verificar a lâmina e a máscara
 
-BASTA RODAR NO TERMINAL python verificar_imagem.py
-
-IRÁ OBTER ALGO COMO:
-
-Imagem aberta com sucesso!
-Dimensões originais: (90112, 91136)
-Número de níveis: 5
-Micrómetros por píxel em X: 0.2425347381273798
-Micrómetros por píxel em Y: 0.2425347381273798
-Ampliação da objetiva: Não disponível
-Nível 0: (90112, 91136)
-Nível 1: (22528, 22784)
-Nível 2: (5632, 5696)
-Nível 3: (1408, 1424) * foi o escolhido!
-Nível 4: (352, 356)
-
-## 6. Executar os scripts por ordem
-
-Executar cada comando separadamente e conferir o resultado antes de avançar.
-
-### A. Verificar a imagem
+Executa na raiz do projeto, com o ambiente virtual ativo:
 
 ```bash
 python verificar_imagem.py
-```
-
-Mostra as dimensões, os níveis de resolução e os micrómetros por píxel (MPP). Gera a pré-visualização da lâmina.
-
-No caso 0466, a imagem original tem 90112 × 91136 píxeis; a pré-visualização utiliza o nível 3, com 1408 × 1424 píxeis. O MPP original é aproximadamente 0,2425 nos dois eixos.
-
-AQUI ALTERAR nivel_visualizacao = PARA O VALOR QUE ESCOLHER! 
-
-
-### B. Verificar a máscara
-
-```bash
 python verificar_mascara.py
 ```
 
-Mostra as dimensões e os valores da máscara e guarda `mascara_previa.png`. No caso testado, o nível 2 tem 1408 × 1424 píxeis e os valores são 0 e 1.
+Os comandos mostram as dimensões de cada nível. Na imagem, confirma também os valores de MPP em X e Y. O script de extração precisa de ambos para calcular o tamanho do recorte na lâmina original.
 
-FAZER A MESMA COISA ACIMA! 
+Compara as duas listas e escolhe níveis reduzidos com **largura e altura exatamente iguais**. No caso 0466, o nível 3 da imagem e o nível 2 da máscara têm ambos 1408 × 1424 píxeis. Para cada caso novo, usa os níveis encontrados na respetiva listagem. Se não houver um par com dimensões iguais ou faltar um dos valores MPP, regista o caso para revisão.
 
- nivel_mascara = 2
-
-alterar aqui para o nivel que mais for parecido com o da imagem
-
-### C. Conferir o alinhamento
+Gera as prévias com os níveis escolhidos. Este comando usa os valores do **0466** como exemplo:
 
 ```bash
+python gerar_previas.py --nivel-imagem 3 --nivel-mascara 2
 python sobrepor_mascara.py
 ```
 
-Abrir `resultados/sobreposicao_mascara.png`. A região vermelha deve acompanhar o tecido. Se estiver deslocada ou cobrir o fundo, interromper e partilhar o problema com o grupo.
+Abre `resultados/<caso>/previas/<caso>_sobreposicao.png`. Confirma que a região vermelha acompanha o tecido. Se estiver deslocada ou cobrir o fundo, revê a correspondência entre os ficheiros antes de extrair recortes. Os níveis escolhidos aqui servem para a visualização. A extração usa a máscara no nível 0 e calcula a escala a partir das dimensões originais.
 
-
-### D. Extrair um recorte
-
-```bash
-python extrair_recorte.py
-```
-
-Seleciona uma posição com tecido, lê uma região na resolução original e prepara um PNG de 224 × 224 píxeis com escala próxima de 0,5 µm/píxel.
-
-Para o caso testado, a região original tem 462 × 462 píxeis. São guardados:
-
-- `resultados/case_radboud_0466_phikon_224.png`
-- `resultados/case_radboud_0466_phikon_224_posicao.txt`
-
-A seleção atual procura uma posição interior na máscara reduzida, mas ainda não verifica a percentagem de tecido de toda a região extraída. Inspecionar o PNG. É um teste inicial, não a seleção definitiva dos recortes do projeto.
-
-### E. Extrair as características com Phikon
+## 7. Processar o caso
 
 ```bash
-python testar_phikon.py
+python extrair_lote.py
+python phikon_lote.py
 ```
 
-Na primeira execução, descarrega o modelo (aproximadamente 350 MB, além de configurações). A extração é feita localmente; este código não envia o recorte para um serviço de inferência.
+Executa o segundo comando após o primeiro terminar. O `execucao.json` é gerado automaticamente pelo Phikon em cada execução; não é preciso executar testes separados nem copiar um JSON de outro caso. Não alteres a configuração entre os dois comandos. Na primeira utilização, o Phikon descarrega os pesos para o computador. O processamento usa MPS quando disponível e CPU nos restantes casos.
 
-O resultado esperado é:
+Os ficheiros ficam em `resultados/<caso>/<execucao>/`.
 
-```text
-Formato das características: (1, 768)
-```
+| Ficheiro | Conteúdo |
+|---|---|
+| `recorte_*.png` | Recortes preparados para o Phikon. |
+| `coordenadas.csv` | Posição, escala e fração estimada de tecido de cada recorte. |
+| `caracteristicas.npz` | Características, coordenadas e nomes dos recortes na mesma ordem. |
+| `preparacao.json` | Parâmetros realmente usados na extração; permite verificar a configuração antes de executar o Phikon. |
+| `execucao.json` | Caso, revisão do modelo, parâmetros e contagem de recortes processados. |
 
-Significa **um recorte com 768 características**, não 768 pacientes nem uma previsão clínica. O ficheiro gerado é `resultados/case_radboud_0466_phikon_224_features.npy`.
+Para o piloto de 1 000 recortes, confirma no terminal ou no JSON que o formato é **(1000, 768)**. Para visualizar a distribuição dos recortes na lâmina, executa `python visualizar_amostragem.py` e abre `visualizacoes/<caso>/<execucao>/distribuicao_recortes.png`. Esta pasta reúne os mapas de todos os casos e pode ser incluída no GitHub.
 
-O código atual utiliza GPU Apple (`mps`) quando disponível e CPU nos restantes casos. A utilização de GPU NVIDIA requer uma adaptação explícita para CUDA.
+Se a extração indicar que a pasta já existe, usa um novo `NOME_EXECUCAO` para repetir o processamento. Se já tiveres os recortes, o CSV e o `preparacao.json` e faltar o NPZ, podes executar diretamente `python phikon_lote.py` com a configuração desse lote.
 
-## 7. Trabalhar em equipa
+Avisa o grupo de qual caso vais processar para evitar duplicações.
 
-1. Cada integrante reproduz primeiro o teste com o mesmo caso.
-2. Comparar dimensões de saída e parâmetros de preparação; pequenas diferenças numéricas entre dispositivos podem ocorrer.
-3. Depois de validarmos o processamento de vários recortes, distribuir casos sem duplicação numa tabela com caso, responsável e estado.
-4. Utilizar o mesmo código, revisão do modelo e parâmetros. Antes da produção em escala, fixar a revisão dos pesos e registar o ambiente.
-5. Partilhar características, coordenadas e configurações numa pasta privada autorizada, mantendo a correspondência por caso.
+## 8. Como partilhar os resultados do piloto no GitHub
 
-Ainda falta implementar um processamento completo por paciente e a padronização dos resultados de vários recortes. Não iniciar a extração em massa com esta versão.
+Os scripts escrevem em `resultados/<caso>/<execucao>/`. Para partilhar um lote verificado, copia apenas o NPZ, o CSV e o JSON para `resultados_piloto/<caso>/<execucao>/`. Usem o repositório privado do grupo se as condições do OWL permitirem versionar os resultados derivados.
 
-## 8. O que pode entrar no GitHub
-
-Incluir scripts, `config.py`, `requirements.txt`, `.gitignore` e este README. Manter dados e resultados fora do repositório.
-
-Conteúdo recomendado do `.gitignore`:
-
-```gitignore
-.venv/
-__pycache__/
-*.pyc
-.DS_Store
-imagens/
-mascaras/
-dados/
-resultados/
-.env
-```
-
-Antes de fazer commit:
+Exemplo para a lâmina 0466, a partir da raiz do projeto:
 
 ```bash
-git status --short
+caso=case_radboud_0466
+execucao=piloto_v1_1000
+origem="resultados/$caso/$execucao"
+destino="resultados_piloto/$caso/$execucao"
+
+mkdir -p "$destino"
+cp -i "$origem/caracteristicas.npz" "$origem/coordenadas.csv" "$origem/execucao.json" "$destino/"
+git add -- "$destino/caracteristicas.npz" "$destino/coordenadas.csv" "$destino/execucao.json"
+git diff --cached --name-status
+git commit --only -m "Adicionar lote OWL $caso" -- "$destino/caracteristicas.npz" "$destino/coordenadas.csv" "$destino/execucao.json"
+git log --oneline origin/main..HEAD
+git push
 ```
 
-Se os dados já estiverem a ser acompanhados pelo Git, acrescentar o `.gitignore` não os remove automaticamente. Resolver isso antes do envio. Nunca publicar tokens ou credenciais.
+Confirma a lista de commits antes do push. As colegas recebem o lote com `git pull`. Atualiza o [registo do piloto](Registo_piloto_OWL.md) com o caminho do lote. Para a agregação, os ficheiros do piloto estão em `resultados_piloto/` e os rótulos continuam em `dados/training_labels.csv`.
+
+Mantém `imagens/`, `mascaras/`, `dados/` e `resultados/` no `.gitignore`. Inclui no GitHub o código, a configuração, o README, o registo e os lotes selecionados em `resultados_piloto/`.
 
 ## 9. Erros frequentes
 
@@ -220,3 +153,7 @@ Se os dados já estiverem a ser acompanhados pelo Git, acrescentar o `.gitignore
 | Pesos `pooler` inesperados | No teste atual, a camada é excluída intencionalmente com `add_pooling_layer=False`; o vetor vem do CLS token. |
 
 
+
+## Organização do repositório
+
+Os scripts do fluxo ficam na raiz. Os mapas de distribuição ficam em `visualizacoes/<caso>/<execucao>/`, separados dos resultados e disponíveis para versionamento no GitHub. As prévias ficam em `resultados/<caso>/previas/` e cada lote em `resultados/<caso>/<execucao>/`. Testes e resultados antigos ficam fora do projeto, num arquivo recuperável. A configuração inicial usa o caso 0466 e 1 000 recortes; para outro caso, altera os campos da secção 5. O mesmo nome de execução pode ser usado para pacientes diferentes.
