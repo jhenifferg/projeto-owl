@@ -125,27 +125,41 @@ Se a pasta do lote já existir, o código protege os resultados. Se só falta o 
 
 ## 8. Publicar os resultados no GitHub
 
-Em qualquer sistema, incluindo PowerShell:
+### 8.1 Preparar o lote e gerar o mapa
+
+Na raiz do projeto, com o ambiente virtual ativo, executa:
 
 ```bash
 python preparar_partilha.py
 ```
 
-O comando valida o lote e copia apenas `caracteristicas.npz`, `coordenadas.csv` e `execucao.json` para `resultados_piloto/<caso>/<execucao>/`. Cópias existentes idênticas são aceites; ficheiros diferentes nunca são substituídos. Esta preparação é local e não faz uploads.
+O comando valida o lote e copia `caracteristicas.npz`, `coordenadas.csv` e `execucao.json` para `resultados_piloto/<caso>/<execucao>/`. Aceita cópias existentes idênticas e preserva ficheiros com conteúdo diferente.
 
-Os resultados podem ser publicados no repositório público do grupo, conforme confirmado pela equipa. A pasta `resultados_piloto/` não é ignorada pelo Git; não é necessária uma pasta privada. Para fazer push, usa a tua conta GitHub com o convite de colaboradora aceite.
+### 8.2 Adicionar os quatro ficheiros ao Git
 
-Depois da preparação, executa os comandos abaixo. O exemplo usa o caso 0466: **substitui `case_radboud_0466`, `piloto_v1_1000` e a mensagem do commit pelo teu caso e execução em todos os caminhos**. Os comandos funcionam em Bash e PowerShell.
+Os comandos abaixo funcionam em Bash e PowerShell. O exemplo usa o caso `0466`. Substitui `case_radboud_0466` e `piloto_v1_1000` nos caminhos pelo teu caso e execução. Atualiza também o número na mensagem do commit.
 
 ```bash
-git add -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json
+git add -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
 git diff --cached --name-status
-git commit --only -m "Adicionar lote OWL 0466" -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json
+```
+
+Confirma que aparecem os **três ficheiros do lote e o PNG de distribuição**. Depois faz o commit:
+
+```bash
+git commit --only -m "Adicionar lote e mapa OWL 0466" -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
+```
+
+### 8.3 Sincronizar e publicar
+
+Usa a tua conta GitHub com o convite de colaboradora aceite. Confirma com `git status --short` se tens alterações locais pendentes e trata-as antes de sincronizar.
+
+```bash
 git pull --rebase
 git push
 ```
 
-Se houver alterações locais pendentes, trata-as antes do pull. Se houver conflito, não uses force push: pede ajuda ao grupo. O `config_local.json` não entra no Git. Atualiza `Registo_piloto_OWL.md` e faz um commit separado desse registo. Para publicar o mapa, adiciona explicitamente o PNG em `visualizacoes/<caso>/<execucao>/` e faz um commit separado. Depois executa `git pull --rebase` e `git push` para enviar também esse commit.
+Se o `pull` indicar um conflito, resolve-o com o grupo antes do `push`. Depois de publicar, confirma no GitHub que aparecem os três ficheiros em `resultados_piloto/` e o PNG em `visualizacoes/`, nas pastas do teu caso e execução.
 
 ## 9. Receber trabalho das colegas
 
