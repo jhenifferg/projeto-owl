@@ -76,21 +76,33 @@ Cria `config_local.json` na raiz com:
 
 Substitui o caso pelo que combinaste com o grupo. Este ficheiro é ignorado pelo Git, para não provocar conflitos entre colegas. `config.py` mantém os parâmetros comuns: 1 000 recortes, 224 px, 0,5 µm/px, mínimo de 80% de tecido, semente 42 e revisão fixa do Phikon. Não alteres esses parâmetros individualmente. Não alteres a configuração entre a extração e o Phikon.
 
-## 6. Conferir a imagem e a máscara
+## 6. Verificar a lâmina e a máscara
+
+### 6.1 Confirmar a abertura dos TIFFs no terminal
+
+Na raiz do projeto, com o ambiente virtual ativo, executa:
 
 ```bash
 python verificar_imagem.py
 python verificar_mascara.py
 ```
 
-Confirma que ambos os ficheiros abrem e que a imagem tem MPP em X e Y. Escolhe níveis reduzidos com largura e altura exatamente iguais. Para 0466, imagem nível 3 e máscara nível 2 têm 1408 × 1424 px:
+Estes comandos mostram **apenas informações no terminal**. Confirma que os dois ficheiros abriram e que a **lâmina** tem valores de MPP em X e Y. Anota as dimensões de cada nível para escolher os níveis das prévias no passo seguinte.
+
+### 6.2 Gerar as prévias e confirmar o alinhamento
+
+Nas listas do terminal, escolhe um nível reduzido da lâmina e um da máscara com **a mesma largura e a mesma altura**. Os números dos níveis podem ser diferentes.
+
+No caso `0466`, o nível **3 da lâmina** e o nível **2 da máscara** têm ambos **1408 × 1424 px**. Se estiveres a processar outro caso, substitui `3` e `2` pelos níveis que encontraste para a tua lâmina e máscara.
 
 ```bash
 python gerar_previas.py --nivel-imagem 3 --nivel-mascara 2
 python sobrepor_mascara.py
 ```
 
-Para outro caso, substitui os níveis pelos valores encontrados. Abre `resultados/<caso>/previas/<caso>_sobreposicao.png` e verifica que a camada vermelha acompanha o tecido. Se não houver níveis iguais, faltar MPP ou a máscara estiver deslocada, interrompe e pede revisão ao grupo.
+O primeiro comando gera os PNGs da lâmina e da máscara. O segundo grava a sobreposição. Abre `resultados/<caso>/previas/<caso>_sobreposicao.png`, substituindo `<caso>` pelo identificador da tua lâmina, e confirma que a região vermelha acompanha o tecido.
+
+Se faltar algum valor de MPP, se não encontrares níveis com dimensões iguais ou se a sobreposição estiver deslocada, regista o caso para revisão antes de extrair os recortes.
 
 ## 7. Executar o piloto
 
