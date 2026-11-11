@@ -1,4 +1,3 @@
-from pathlib import Path
 import openslide
 from config import PASTA_PROJETO, NOME_CASO
 
@@ -27,19 +26,3 @@ with openslide.OpenSlide(str(caminho_imagem)) as imagem:
 
     for nivel, dimensoes in enumerate(imagem.level_dimensions):
         print(f"Nível {nivel}: {dimensoes}")
-        
-    nivel_visualizacao = 3
-
-    previa = imagem.read_region(
-        (0, 0),
-        nivel_visualizacao,
-        imagem.level_dimensions[nivel_visualizacao]
-    ).convert("RGB")
-
-    pasta_resultados = pasta_projeto / "resultados"
-    pasta_resultados.mkdir(exist_ok=True)
-
-    caminho_previa = pasta_resultados / f"{nome_caso}_previa.png"
-    previa.save(caminho_previa)
-
-    print("Pré-visualização guardada em:", caminho_previa)

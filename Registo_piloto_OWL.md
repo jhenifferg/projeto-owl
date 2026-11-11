@@ -1,6 +1,6 @@
 # Registo do piloto OWL
 
-Este documento acompanha a passagem dos recortes de cada lâmina para uma representação por paciente. Atualizem uma linha por caso à medida que verificarem os ficheiros. A tabela regista o progresso da equipa e os resultados completos ficam na pasta `resultados_piloto/`.
+Este documento acompanha a passagem dos recortes de cada lâmina para uma representação por paciente. Atualizem uma linha por caso à medida que verificarem os ficheiros. A tabela regista o progresso da equipa e os resultados completos ficam na pasta `resultados_piloto/`. O caminho pode ser local; a publicação do lote 0466 no GitHub ainda está pendente.
 
 ## Configuração comum
 
@@ -17,7 +17,7 @@ Este documento acompanha a passagem dos recortes de cada lâmina para uma repres
 
 | Caso | Responsável | Alinhamento visual | NPZ e CSV | JSON | Rótulo associado | Caminho do lote |
 |---|---|---|---|---|---|---|
-| `case_radboud_0466` | Jheniffer | Verificado no teste anterior | NPZ presente, formato 1 000 × 768 registado no JSON. CSV com 1 000 linhas de dados. Conferência da ordem pendente. | Presente | Pendente | `resultados_piloto/case_radboud_0466/piloto_v1_1000/` |
+| `case_radboud_0466` | Jheniffer | Verificado no teste anterior | NPZ presente, formato 1 000 × 768 registado no JSON. CSV com 1 000 linhas de dados. Ordem e coordenadas conferidas automaticamente. | Presente | Pendente | `resultados_piloto/case_radboud_0466/piloto_v1_1000/` |
 | `case_radboud_0596` | A definir | Pendente | Pendente | Pendente | Pendente | A preencher |
 | Adicionar novo caso | | | | | | |
 
@@ -37,5 +37,5 @@ Este documento acompanha a passagem dos recortes de cada lâmina para uma repres
 
 ## Onde guardar
 
-- **GitHub privado** — código, configuração, instruções, registo e os três ficheiros de cada lote validado em `resultados_piloto/<caso>/<execucao>/`, conforme as condições de utilização do OWL.
+- **Partilha autorizada pela equipa** — os três ficheiros de cada lote validado em `resultados_piloto/<caso>/<execucao>/`, conforme as condições de utilização do OWL.
 - **Localmente** — imagens, máscaras, rótulos e saídas originais dos scripts.

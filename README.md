@@ -1,159 +1,173 @@
-# Projeto OWL — guia de utilização
+# Projeto OWL — guia da equipa
 
-Projeto académico de previsão de recorrência bioquímica do cancro da próstata e estudo de explicações por remoção de regiões de imagens histológicas.
-
-## Estado atual
-
-O fluxo atual permite verificar uma lâmina e a máscara de tecido, extrair recortes em lote e guardar as 768 características de cada recorte com o Phikon. O caso 0466 já foi processado com 1 000 recortes. Este guia cobre a preparação dos dados para o futuro modelo de sobrevivência.
+Este projeto extrai 1 000 recortes de tecido por lâmina e gera características Phikon de dimensão `(1000, 768)`, coordenadas e um registo JSON. Ainda não treina um modelo de sobrevivência.
 
 ## 1. Preparar o computador
 
-Instalar Python (a versão usada neste projeto é 3.14.7) e VS Code.
+Instala Git, Python e VS Code com a extensão Python. O ambiente validado é macOS Apple Silicon com Python 3.14.7. Windows e Linux têm instruções abaixo, mas a execução completa nesses sistemas ainda não foi validada. O processamento usa MPS no Mac compatível e CPU nos restantes computadores; não é necessário configurar CUDA.
 
-## 2. Obter o código
+Abre um terminal e confirma `git --version`. No Mac/Linux confirma `python3 --version`; no Windows, `py --version`. Usa Python 3.14 para reproduzir o ambiente. Reserva espaço para a imagem original, máscara, ambiente Python, pesos do modelo e recortes; verifica o tamanho dos downloads antes de começar.
 
-No GitHub, abrir o repositório, selecionar **Code → Download ZIP**, extrair o ZIP e abrir a pasta no VS Code em **File → Open Folder**. Quem já utiliza Git pode clonar o repositório.
+## 2. Clonar o repositório
 
-Abrir **Terminal → New Terminal**. Confirmar que o terminal está na pasta do projeto.
+Usa clonagem, não Download ZIP, para receber atualizações e partilhar alterações:
 
-## 3. Criar o ambiente Python
+```bash
+git clone https://github.com/jhenifferg/projeto-owl.git
+cd projeto-owl
+```
 
-No macOS/Linux:
+Abre esta pasta no VS Code. Todos os comandos seguintes são executados na raiz, onde está `config.py`. Para fazer push, cada colega precisa de conta GitHub, convite de colaboradora aceite e autenticação Git configurada. A leitura de um repositório público não concede permissão de escrita. No VS Code, a autenticação pode ser feita pelo fluxo de início de sessão do GitHub quando solicitado.
+
+Antes do primeiro commit, configura a tua identidade com `git config user.name "O teu nome"` e `git config user.email "O teu email associado ao GitHub"` dentro desta pasta.
+
+## 3. Instalar as dependências
+
+macOS/Linux:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-No Windows, em PowerShell:
+Windows (PowerShell):
 
 ```powershell
-py -m venv .venv
+py -3.14 -m venv .venv
 .venv\Scripts\Activate.ps1
 ```
 
-Se o PowerShell bloquear a ativação, usar um terminal Command Prompt no VS Code e executar `.venv\Scripts\activate.bat`.
+Se a ativação for bloqueada, abre Command Prompt e usa `.venv\Scripts\activate.bat`, sem alterar políticas de segurança.
 
-Deve aparecer `(.venv)` no início da linha. Sempre que abrir um novo terminal, volte a ativar o ambiente.
-
-Instalar as dependências:
+Com o ambiente ativo, em qualquer sistema:
 
 ```bash
 python -m pip install -r requirements.txt
+python -m pip check
+python -c "import openslide, torch, transformers, numpy; print('Dependências disponíveis')"
 ```
 
-No VS Code, abrir **Python: Select Interpreter** pela paleta de comandos e selecionar o Python de `.venv`.
+O `requirements.txt` inclui a biblioteca nativa `openslide-bin`. Se a instalação indicar que não existe uma distribuição compatível, envia ao grupo o erro, a versão de Python e o sistema operativo antes de alterar versões. No VS Code seleciona o interpretador `.venv` em **Python: Select Interpreter**. Reativa o ambiente em cada terminal novo.
 
-## 4. Organizar os dados locais
+## 4. Obter os dados do teu caso
 
-Criar estas pastas na raiz do projeto:
+Combina primeiro no grupo qual caso vais processar. Acede à [página de download oficial do OWL](https://owl.grand-challenge.org/data-download/) com a tua conta autorizada e segue as condições de acesso apresentadas pelo desafio. Se não tiveres acesso, resolve-o com o grupo antes de executar os scripts. Descarrega apenas a lâmina atribuída, a máscara correspondente e os rótulos necessários; não é preciso descarregar o conjunto completo.
 
-| Pasta | Conteúdo |
-|---|---|
-| `imagens/` | Imagens originais `.tif`. |
-| `mascaras/` | Máscaras correspondentes, com o sufixo `_tissue.tif`. |
-| `dados/` | `training_labels.csv`. |
-| `resultados/` | Ficheiros produzidos pelos scripts; a pasta é criada pelo código quando necessário. |
+Cria estas pastas na raiz e coloca os ficheiros nos caminhos indicados (0466 é um exemplo; usa o teu identificador):
 
-
-## 5. Configurar um caso novo
-
-Em `config.py`, altera estas três linhas. O exemplo usa o caso 0596. Usa o identificador do teu caso sem `.tif` nem `_tissue`.
-
-```python
-NOME_CASO = "case_radboud_0596"
-NOME_EXECUCAO = "piloto_v1_1000"
-QUANTIDADE_RECORTES = 1000
+```text
+imagens/case_radboud_0466.tif
+mascaras/case_radboud_0466_tissue.tif
+dados/training_labels.csv
 ```
 
-Coloca `case_radboud_0596.tif` em `imagens/` e `case_radboud_0596_tissue.tif` em `mascaras/`. Usa a mesma revisão do Phikon e os parâmetros de preparação acordados pelo grupo.
+As imagens, máscaras e rótulos não são distribuídos com o código. Os rótulos serão necessários para a análise de sobrevivência, mas não para extrair características. O download do modelo Phikon requer internet na primeira execução; a imagem é processada localmente.
 
-## 6. Verificar a lâmina e a máscara
+## 5. Configurar o teu caso sem alterar a configuração da equipa
 
-Executa na raiz do projeto, com o ambiente virtual ativo:
+Cria `config_local.json` na raiz com:
+
+```json
+{
+  "caso": "case_radboud_0466",
+  "execucao": "piloto_v1_1000"
+}
+```
+
+Substitui o caso pelo que combinaste com o grupo. Este ficheiro é ignorado pelo Git, para não provocar conflitos entre colegas. `config.py` mantém os parâmetros comuns: 1 000 recortes, 224 px, 0,5 µm/px, mínimo de 80% de tecido, semente 42 e revisão fixa do Phikon. Não alteres esses parâmetros individualmente. Não alteres a configuração entre a extração e o Phikon.
+
+## 6. Conferir a imagem e a máscara
 
 ```bash
 python verificar_imagem.py
 python verificar_mascara.py
 ```
 
-Os comandos mostram as dimensões de cada nível. Na imagem, confirma também os valores de MPP em X e Y. O script de extração precisa de ambos para calcular o tamanho do recorte na lâmina original.
-
-Compara as duas listas e escolhe níveis reduzidos com **largura e altura exatamente iguais**. No caso 0466, o nível 3 da imagem e o nível 2 da máscara têm ambos 1408 × 1424 píxeis. Para cada caso novo, usa os níveis encontrados na respetiva listagem. Se não houver um par com dimensões iguais ou faltar um dos valores MPP, regista o caso para revisão.
-
-Gera as prévias com os níveis escolhidos. Este comando usa os valores do **0466** como exemplo:
+Confirma que ambos os ficheiros abrem e que a imagem tem MPP em X e Y. Escolhe níveis reduzidos com largura e altura exatamente iguais. Para 0466, imagem nível 3 e máscara nível 2 têm 1408 × 1424 px:
 
 ```bash
 python gerar_previas.py --nivel-imagem 3 --nivel-mascara 2
 python sobrepor_mascara.py
 ```
 
-Abre `resultados/<caso>/previas/<caso>_sobreposicao.png`. Confirma que a região vermelha acompanha o tecido. Se estiver deslocada ou cobrir o fundo, revê a correspondência entre os ficheiros antes de extrair recortes. Os níveis escolhidos aqui servem para a visualização. A extração usa a máscara no nível 0 e calcula a escala a partir das dimensões originais.
+Para outro caso, substitui os níveis pelos valores encontrados. Abre `resultados/<caso>/previas/<caso>_sobreposicao.png` e verifica que a camada vermelha acompanha o tecido. Se não houver níveis iguais, faltar MPP ou a máscara estiver deslocada, interrompe e pede revisão ao grupo.
 
-## 7. Processar o caso
+## 7. Executar o piloto
+
+Executa cada comando apenas depois de o anterior terminar sem erro:
 
 ```bash
 python extrair_lote.py
 python phikon_lote.py
+python verificar_lote.py
+python visualizar_amostragem.py
 ```
 
-Executa o segundo comando após o primeiro terminar. O `execucao.json` é gerado automaticamente pelo Phikon em cada execução; não é preciso executar testes separados nem copiar um JSON de outro caso. Não alteres a configuração entre os dois comandos. Na primeira utilização, o Phikon descarrega os pesos para o computador. O processamento usa MPS quando disponível e CPU nos restantes casos.
+A pasta `resultados/<caso>/<execucao>/` contém os recortes PNG, `coordenadas.csv`, `preparacao.json`, `caracteristicas.npz` e `execucao.json`. O JSON final é gerado automaticamente na mesma execução. O registo da preparação impede que sejam atribuídos aos recortes parâmetros diferentes dos usados na extração.
 
-Os ficheiros ficam em `resultados/<caso>/<execucao>/`.
+O verificador confirma contagem, formato `(1000, 768)`, valores finitos, ordem dos nomes e coordenadas, caso e revisão do modelo. Uma verificação automática não substitui a inspeção visual da máscara.
 
-| Ficheiro | Conteúdo |
-|---|---|
-| `recorte_*.png` | Recortes preparados para o Phikon. |
-| `coordenadas.csv` | Posição, escala e fração estimada de tecido de cada recorte. |
-| `caracteristicas.npz` | Características, coordenadas e nomes dos recortes na mesma ordem. |
-| `preparacao.json` | Parâmetros realmente usados na extração; permite verificar a configuração antes de executar o Phikon. |
-| `execucao.json` | Caso, revisão do modelo, parâmetros e contagem de recortes processados. |
+O mapa fica em `visualizacoes/<caso>/<execucao>/distribuicao_recortes.png`. Esta pasta permite reunir os mapas de todos os casos no GitHub, sem colocar as imagens no README.
 
-Para o piloto de 1 000 recortes, confirma no terminal ou no JSON que o formato é **(1000, 768)**. Para visualizar a distribuição dos recortes na lâmina, executa `python visualizar_amostragem.py` e abre `visualizacoes/<caso>/<execucao>/distribuicao_recortes.png`. Esta pasta reúne os mapas de todos os casos e pode ser incluída no GitHub.
+Se a pasta do lote já existir, o código protege os resultados. Se só falta o NPZ e a preparação terminou, retoma em `phikon_lote.py`. Se a extração foi interrompida ou pretendes repetir o lote, escolhe outro nome em `config_local.json`, por exemplo `piloto_v1_1000_v2`. Não copies JSONs entre execuções.
 
-Se a extração indicar que a pasta já existe, usa um novo `NOME_EXECUCAO` para repetir o processamento. Se já tiveres os recortes, o CSV e o `preparacao.json` e faltar o NPZ, podes executar diretamente `python phikon_lote.py` com a configuração desse lote.
+## 8. Preparar os três ficheiros para partilha
 
-Avisa o grupo de qual caso vais processar para evitar duplicações.
-
-## 8. Como partilhar os resultados do piloto no GitHub
-
-Os scripts escrevem em `resultados/<caso>/<execucao>/`. Para partilhar um lote verificado, copia apenas o NPZ, o CSV e o JSON para `resultados_piloto/<caso>/<execucao>/`. Usem o repositório privado do grupo se as condições do OWL permitirem versionar os resultados derivados.
-
-Exemplo para a lâmina 0466, a partir da raiz do projeto:
+Em qualquer sistema, incluindo PowerShell:
 
 ```bash
-caso=case_radboud_0466
-execucao=piloto_v1_1000
-origem="resultados/$caso/$execucao"
-destino="resultados_piloto/$caso/$execucao"
+python preparar_partilha.py
+```
 
-mkdir -p "$destino"
-cp -i "$origem/caracteristicas.npz" "$origem/coordenadas.csv" "$origem/execucao.json" "$destino/"
-git add -- "$destino/caracteristicas.npz" "$destino/coordenadas.csv" "$destino/execucao.json"
+O comando valida o lote e copia apenas `caracteristicas.npz`, `coordenadas.csv` e `execucao.json` para `resultados_piloto/<caso>/<execucao>/`. Cópias existentes idênticas são aceites; ficheiros diferentes nunca são substituídos. Esta preparação é local e não faz uploads.
+
+O repositório do grupo é público. A publicação dos resultados derivados deve estar acordada com o grupo e ser permitida pelas condições do OWL; caso contrário, entrega os três ficheiros por um canal privado autorizado. A presença de um caminho no registo não significa que o lote já esteja no GitHub.
+
+Quando a publicação estiver autorizada, os comandos seguintes funcionam em Bash e PowerShell. Substitui os caminhos pelo teu caso e execução:
+
+```bash
+git add -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json
 git diff --cached --name-status
-git commit --only -m "Adicionar lote OWL $caso" -- "$destino/caracteristicas.npz" "$destino/coordenadas.csv" "$destino/execucao.json"
-git log --oneline origin/main..HEAD
+git commit --only -m "Adicionar lote OWL 0466" -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json
+git pull --rebase
 git push
 ```
 
-Confirma a lista de commits antes do push. As colegas recebem o lote com `git pull`. Atualiza o [registo do piloto](Registo_piloto_OWL.md) com o caminho do lote. Para a agregação, os ficheiros do piloto estão em `resultados_piloto/` e os rótulos continuam em `dados/training_labels.csv`.
+Se houver alterações locais pendentes, trata-as antes do pull. Se houver conflito, não uses force push: pede ajuda ao grupo. O `config_local.json` não entra no Git. Atualiza `Registo_piloto_OWL.md` e faz um commit separado desse registo. Para publicar o mapa, adiciona explicitamente o PNG em `visualizacoes/<caso>/<execucao>/` e faz um commit separado, após a mesma verificação das condições de publicação.
 
-Mantém `imagens/`, `mascaras/`, `dados/` e `resultados/` no `.gitignore`. Inclui no GitHub o código, a configuração, o README, o registo e os lotes selecionados em `resultados_piloto/`.
+## 9. Receber trabalho das colegas
 
-## 9. Erros frequentes
+Com as alterações locais guardadas em commits e sem conflitos:
 
-| Situação | O que verificar |
+```bash
+git pull --ff-only
+```
+
+Um lote publicado aparece em `resultados_piloto/`. Para validar um lote recebido, sem precisar das lâminas nem de executar Phikon:
+
+```bash
+python verificar_lote.py --pasta resultados_piloto/case_radboud_0466/piloto_v1_1000
+```
+
+Se a pasta não aparecer, confirma que a colega fez push e partilhou o nome do caso. Se `git pull --ff-only` falhar por divergência, pede ajuda para integrar os commits.
+
+## Organização
+
+- Raiz: código, configuração comum, dependências e instruções.
+- `config_local.json`: seleção pessoal do caso, ignorada pelo Git.
+- `imagens/`, `mascaras/`, `dados/`, `resultados/`: dados e processamento locais, ignorados pelo Git.
+- `resultados_piloto/`: três ficheiros por lote preparado para partilha.
+- `visualizacoes/`: mapas separados por caso e execução.
+
+## Erros frequentes
+
+| Erro | Como resolver |
 |---|---|
-| `Unsupported or missing image file` | Caminho, download completo e nome exato; a máscara termina em `_tissue.tif`. |
-| `ModuleNotFoundError` | Ambiente `.venv` ativo e dependências instaladas nesse ambiente. |
-| `FileNotFoundError` | Pastas, nome do caso e ordem de execução dos scripts. |
-| PNG da máscara parece preto | Os valores podem ser 0 e 1; verificar a sobreposição colorida. |
-| Aviso de falta de `HF_TOKEN` | O teste público já funcionou sem token; esperar o download ou verificar limites se falhar. |
-| Aviso de `use_fast` | No preparador, usar `backend="pil"` na versão já testada. |
-| Pesos `pooler` inesperados | No teste atual, a camada é excluída intencionalmente com `add_pooling_layer=False`; o vetor vem do CLS token. |
-
-
-
-## Organização do repositório
-
-Os scripts do fluxo ficam na raiz. Os mapas de distribuição ficam em `visualizacoes/<caso>/<execucao>/`, separados dos resultados e disponíveis para versionamento no GitHub. As prévias ficam em `resultados/<caso>/previas/` e cada lote em `resultados/<caso>/<execucao>/`. Testes e resultados antigos ficam fora do projeto, num arquivo recuperável. A configuração inicial usa o caso 0466 e 1 000 recortes; para outro caso, altera os campos da secção 5. O mesmo nome de execução pode ser usado para pacientes diferentes.
+| `FileNotFoundError` | Confere os nomes da lâmina e máscara, a configuração local e a ordem dos comandos. |
+| `ModuleNotFoundError` | Ativa `.venv` e instala as dependências nesse ambiente. |
+| Pasta já existe | Retoma apenas a etapa em falta ou usa um nome novo de execução. |
+| Configuração difere da preparação | Restaura os parâmetros usados ou cria outra execução. |
+| Poucos candidatos | Regista o caso para revisão; não reduzas o mínimo de tecido sem acordo do grupo. |
+| `not a git repository` | Usa a pasta criada por `git clone`, não um ZIP. |
+| Push sem permissão | Confirma o convite de colaboradora e a conta autenticada. |
+| Máscara parece preta | Os valores podem ser 0 e 1; inspeciona a sobreposição colorida. |
