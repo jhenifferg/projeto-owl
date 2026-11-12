@@ -74,7 +74,7 @@ Cria `config_local.json` na raiz com:
 }
 ```
 
-Substitui o caso pelo que combinaste com o grupo. Este ficheiro é ignorado pelo Git, para não provocar conflitos entre colegas. `config.py` mantém os parâmetros comuns: 1 000 recortes, 224 px, 0,5 µm/px, mínimo de 80% de tecido, semente 42 e revisão fixa do Phikon. Não alteres esses parâmetros individualmente. Não alteres a configuração entre a extração e o Phikon.
+Substitui o caso pelo que combinaste com o grupo. Este ficheiro é ignorado pelo Git, para não provocar conflitos entre colegas. `config.py` mantém os parâmetros comuns: 1 000 recortes, 224 px, 0,5 µm/px, mínimo de 80% de tecido, semente 42 e revisão fixa do Phikon. Não alteres esses parâmetros individualmente. Não alteres a configuração entre a extração e o Phikon. Para confirmar, executar: python -c "import config; print(config.NOME_CASO)"
 
 ## 6. Verificar a lâmina e a máscara
 
@@ -123,31 +123,36 @@ O mapa fica em `visualizacoes/<caso>/<execucao>/distribuicao_recortes.png`. Esta
 
 Se a pasta do lote já existir, o código protege os resultados. Se só falta o NPZ e a preparação terminou, retoma em `phikon_lote.py`. Se a extração foi interrompida ou pretendes repetir o lote, escolhe outro nome em `config_local.json`, por exemplo `piloto_v1_1000_v2`. Não copies JSONs entre execuções.
 
+Antes de publicar, confirma no mapa se há recortes fora do tecido (vidro, bordas da lamela). Estes recortes são marcados automaticamente por `filtrar_recortes.py`, executado na secção 8 depois de `preparar_partilha.py`.
+
 ## 8. Publicar os resultados no GitHub
 
-### 8.1 Preparar o lote e gerar o mapa
+### 8.1 Preparar o lote e filtrar recortes sem tecido
 
-Na raiz do projeto, com o ambiente virtual ativo, executa:
+Na raiz do projeto, com o ambiente virtual ativo, executa por esta ordem:
 
 ```bash
 python preparar_partilha.py
+python filtrar_recortes.py
 ```
 
-O comando valida o lote e copia `caracteristicas.npz`, `coordenadas.csv` e `execucao.json` para `resultados_piloto/<caso>/<execucao>/`. Aceita cópias existentes idênticas e preserva ficheiros com conteúdo diferente.
+O primeiro comando valida o lote e copia `caracteristicas.npz`, `coordenadas.csv` e `execucao.json` para `resultados_piloto/<caso>/<execucao>/`. Aceita cópias existentes idênticas e preserva ficheiros com conteúdo diferente.
 
-### 8.2 Adicionar os quatro ficheiros ao Git
+O segundo marca os recortes sem tecido (vidro, bordas da lamela, lúmenes vazios): exclui os que têm pouca cor (menos de 25% de píxeis com cor de tecido) **e** são lisos (textura mediana abaixo de 3,5). Grava `qualidade_recortes.csv` na mesma pasta de `resultados_piloto/`. O NPZ não é alterado: na análise, a média de cada paciente ignora as linhas com `excluir = 1`. Confirma o resultado em `resultados/<caso>/<execucao>/mapa_filtragem.png` (verde = mantido, vermelho = excluído). Se os PNG já tiverem sido apagados, basta ter a lâmina em `imagens/`.
+
+### 8.2 Adicionar os cinco ficheiros ao Git
 
 Os comandos abaixo funcionam em Bash e PowerShell. O exemplo usa o caso `0466`. Substitui `case_radboud_0466` e `piloto_v1_1000` nos caminhos pelo teu caso e execução. Atualiza também o número na mensagem do commit.
 
 ```bash
-git add -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
+git add -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json resultados_piloto/case_radboud_0466/piloto_v1_1000/qualidade_recortes.csv visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
 git diff --cached --name-status
 ```
 
-Confirma que aparecem os **três ficheiros do lote e o PNG de distribuição**. Depois faz o commit:
+Confirma que aparecem os **quatro ficheiros do lote e o PNG de distribuição**. Depois faz o commit:
 
 ```bash
-git commit --only -m "Adicionar lote e mapa OWL 0466" -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
+git commit --only -m "Adicionar lote e mapa OWL 0466" -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json resultados_piloto/case_radboud_0466/piloto_v1_1000/qualidade_recortes.csv visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
 ```
 
 ### 8.3 Sincronizar e publicar
@@ -159,7 +164,7 @@ git pull --rebase
 git push
 ```
 
-Se o `pull` indicar um conflito, resolve-o com o grupo antes do `push`. Depois de publicar, confirma no GitHub que aparecem os três ficheiros em `resultados_piloto/` e o PNG em `visualizacoes/`, nas pastas do teu caso e execução.
+Se o `pull` indicar um conflito, resolve-o com o grupo antes do `push`. Depois de publicar, confirma no GitHub que aparecem os quatro ficheiros em `resultados_piloto/` e o PNG em `visualizacoes/`, nas pastas do teu caso e execução.
 
 ## 9. Receber trabalho das colegas
 
