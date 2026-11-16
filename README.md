@@ -153,6 +153,8 @@ Confirma que aparecem os **quatro ficheiros do lote e o PNG de distribuição**.
 
 ```bash
 git commit --only -m "Adicionar lote e mapa OWL 0466" -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json resultados_piloto/case_radboud_0466/piloto_v1_1000/qualidade_recortes.csv visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
+visualizacoes/case_radboud_0466/piloto_v1_1000/recortes_excluidos.png
+visualizacoes/case_radboud_0466/piloto_v1_1000/recortes_limite.png
 ```
 
 ### 8.3 Sincronizar e publicar
