@@ -22,6 +22,8 @@ Saídas:
     resultados/<caso>/<execucao>/recortes_excluidos.png          miniaturas dos excluídos
     resultados/<caso>/<execucao>/recortes_limite.png             mantidos mais perto do limiar
     resultados/<caso>/<execucao>/mapa_filtragem.png              verde = mantido, vermelho = excluído
+    visualizacoes/<caso>/<execucao>/                             cópias do mapa e das duas grelhas,
+                                                                 para partilhar no GitHub
 """
 
 import argparse
@@ -165,6 +167,23 @@ def montar_miniaturas(fonte, indices, destino, titulo):
     gravar_imagem(montagem, destino, titulo)
 
 
+def copiar_miniaturas_para_visualizacoes(caso, pasta_local):
+    """Copia as grelhas de miniaturas para visualizacoes/, que é partilhada no GitHub."""
+    pasta_visualizacoes = PASTA_PROJETO / "visualizacoes" / caso / pasta_local.name
+    pasta_visualizacoes.mkdir(parents=True, exist_ok=True)
+    for nome in ("recortes_excluidos.png", "recortes_limite.png"):
+        origem = pasta_local / nome
+        destino = pasta_visualizacoes / nome
+        try:
+            if origem.exists():
+                shutil.copy2(origem, destino)
+                print(f"  Cópia para partilha: {destino}")
+            else:
+                destino.unlink(missing_ok=True)
+        except OSError as erro:
+            print(f"  AVISO: não foi possível copiar {nome} ({erro}).")
+
+
 def desenhar_mapa(caso, pasta_local, linhas, resultados):
     """Desenha os recortes sobre a lâmina: verde = mantido, vermelho = excluído."""
     caminho_imagem = PASTA_PROJETO / "imagens" / f"{caso}.tif"
@@ -201,6 +220,11 @@ def desenhar_mapa(caso, pasta_local, linhas, resultados):
     desenho.text((10, 9), f"verde: mantidos ({len(resultados) - n_excluidos})", fill=(0, 140, 0))
     desenho.text((10, 26), f"vermelho: excluidos ({n_excluidos})", fill=(200, 0, 0))
     gravar_imagem(fundo, pasta_local / "mapa_filtragem.png", "Mapa da filtragem")
+
+    # Cópia para visualizacoes/, que é partilhada no GitHub (ao lado do mapa de distribuição).
+    pasta_visualizacoes = PASTA_PROJETO / "visualizacoes" / caso / pasta_local.name
+    pasta_visualizacoes.mkdir(parents=True, exist_ok=True)
+    gravar_imagem(fundo, pasta_visualizacoes / "mapa_filtragem.png", "Mapa para partilha")
 
 
 def encontrar_lote(caso, execucao):
@@ -293,6 +317,7 @@ def processar_lote(caso, execucao, excluir_tinta, forcar_lamina=False):
 
     if not forcar_lamina:
         desenhar_mapa(caso, pasta_local, linhas, resultados)
+        copiar_miniaturas_para_visualizacoes(caso, pasta_local)
 
     if forcar_lamina:
         comparar_com_png(pasta_local, resultados)
