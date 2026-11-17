@@ -83,6 +83,16 @@ def ajustar_caminho(X, evento, tempo, l1_ratio, alphas=None):
 
 def escolher_alpha(X, evento, tempo, l1_ratio, semente, particoes_internas=3):
     """Escolhe o alpha por validação cruzada interna, só com os dados recebidos."""
+    print("\nAlpha          Partições válidas   C-index médio   Coef. ativos*")
+    for i, alpha_candidato in enumerate(alphas):
+        c_medio = f"{medias[i]:.3f}" if pontuacoes[i] else "n/d"
+        ativos = np.count_nonzero(caminho.coef_[:, i])
+        print(
+            f"{alpha_candidato:<14.6g} "
+            f"{len(pontuacoes[i])}/{k:<18} "
+            f"{c_medio:<15} {ativos}"
+        )
+    print("* Coeficientes ativos no ajuste com os dados recebidos pela função.")
     escala = StandardScaler().fit(X)
     Xn = escala.transform(X)
     caminho = ajustar_caminho(Xn, evento, tempo, l1_ratio)
