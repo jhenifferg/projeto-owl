@@ -145,18 +145,15 @@ O segundo marca os recortes sem tecido (vidro, bordas da lamela, lúmenes vazios
 Os comandos abaixo funcionam em Bash e PowerShell. O exemplo usa o caso `0466`. Substitui `case_radboud_0466` e `piloto_v1_1000` nos caminhos pelo teu caso e execução. Atualiza também o número na mensagem do commit.
 
 ```bash
-git add -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json resultados_piloto/case_radboud_0466/piloto_v1_1000/qualidade_recortes.csv visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
+git add -- resultados_piloto/case_radboud_0466 visualizacoes/case_radboud_0466
 git diff --cached --name-status
 ```
 
 Confirma que aparecem os **quatro ficheiros do lote e o PNG de distribuição**. Depois faz o commit:
 
 ```bash
-git commit --only -m "Adicionar lote e mapa OWL 0466" -- resultados_piloto/case_radboud_0466/piloto_v1_1000/caracteristicas.npz resultados_piloto/case_radboud_0466/piloto_v1_1000/coordenadas.csv resultados_piloto/case_radboud_0466/piloto_v1_1000/execucao.json resultados_piloto/case_radboud_0466/piloto_v1_1000/qualidade_recortes.csv visualizacoes/case_radboud_0466/piloto_v1_1000/distribuicao_recortes.png
-visualizacoes/case_radboud_0466/piloto_v1_1000/recortes_excluidos.png
-visualizacoes/case_radboud_0466/piloto_v1_1000/recortes_limite.png
+git commit --only -m "Adicionar lote e mapa OWL 0466" 
 ```
-
 ### 8.3 Sincronizar e publicar
 
 Usa a tua conta GitHub com o convite de colaboradora aceite. Confirma com `git status --short` se tens alterações locais pendentes e trata-as antes de sincronizar.
