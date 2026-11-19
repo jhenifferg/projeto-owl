@@ -152,7 +152,7 @@ git diff --cached --name-status
 Confirma que aparecem os **quatro ficheiros do lote e o PNG de distribuição**. Depois faz o commit:
 
 ```bash
-git commit --only -m "Adicionar lote e mapa OWL 0466" 
+git commit -m "Adicionar lote e mapa OWL 0466" 
 ```
 ### 8.3 Sincronizar e publicar
 
