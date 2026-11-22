@@ -153,6 +153,8 @@ Confirma que aparecem os **quatro ficheiros do lote e o PNG de distribuição**.
 
 ```bash
 git commit -m "Adicionar lote e mapa OWL 0466" 
+
+(Adicionando lotes)
 ```
 ### 8.3 Sincronizar e publicar
 
